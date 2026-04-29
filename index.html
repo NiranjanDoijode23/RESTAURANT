@@ -1,107 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESTAURANT WEBSITE</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logoimg">
-            <img src="images/logo.png" alt="">
-        </div>
-        <div class="logonm">
-            <h3>NIRU's RESTO.</h3>
-        </div>
-    </nav>
-    <!-- HERO SECTION -->
-    <div class="hero">
-        <div class="container">
-            <div class="imgcont">
-                <img src="images/hero_image.png" alt="">
-            </div>
-            <div class="textcon">
-                <div class="tag">50% OFF ON ALL PRODUCTs </div>
-                <h2>ENJOY YOUR DELICIOUS FOOD :) </h2>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea vero, soluta optio voluptatem iste fugit est maxime sunt sed dicta nemo delectus veniam praesentium itaque..</p>
-                <button class="expl_btn">EXPLORE NOW</button>
-            </div>
-        </div>
-    </div>
-    <div class="cardsection">   
-        <div class="card_container">
-            <div class="cards">
-                <div class="card_img">
-                    <img src="icons/delivery.png" alt="">
-                </div>
-                <div class="cardtxt"><h3> FAST HOME DELIVERY</h3>
-                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Labore, blanditiis?</p>
-                </div>
-            </div>
-            <div class="cards">
-                <div class="card_img">
-                    <img src="icons/fresh.png" alt="">
-                </div>
-                <div class="cardtxt"><h3>FRESH FOODS</h3>
-                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Labore, blanditiis?</p>
-                </div>
-            </div>
-            <div class="cards">
-                <div class="card_img">
-                    <img src="icons/discount.png" alt="">
-                </div>
-                <div class="cardtxt"><h3>DISCOUNT VOUCHER</h3>
-                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Labore, blanditiis?</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="border"></div>
-    <!-- hero sectio complte -->
 
-    <div class="menu">
-<div class="topsection">
-    <div class="tag">OUR MENU</div>
-    <div class="txt">  <h2>EXPLORE OUR MENU :</h2></div>
+<nav>
+  <div class="logo">NiRaNjAn's <span>ReSto</span></div>
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="Search recipes... e.g. pasta, curry">
+    <button id="searchBtn">Search</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">✦ Powered by TheMealDB API</div>
+  <h1>Discover <em>Recipes</em><br>You'll Love</h1>
+  <p>Search from thousands of recipes. Real ingredients, real instructions — right in your browser.</p>
 </div>
-<div class="grid">
-    <div class="item1"><img src="images/grid_image1.png" alt=""></div>
-    <div class="item2"><img src="images/grid_image2.png" alt=""></div>
-    <div class="item3"><img src="images/grid_image3.png" alt=""></div>
-    <div class="item4"><img src="images/grid_image4.png" alt=""></div>
-    <div class="item5"><img src="images/grid_image5.png" alt=""></div>
-    <div class="item6"><img src="images/grid_image6.png" alt=""></div>
-    <div class="item7"><img src="images/grid_image7.png" alt=""></div>
+
+<div id="mainContent">
+  <div class="grid-label">
+    <span></span><h2>Trending Today</h2>
+  </div>
+  <div class="cards-grid" id="cardsGrid">
+    <!-- JS fills this -->
+  </div>
 </div>
+
+<div class="empty" id="emptyState" style="display:none">
+  <div class="emoji">🍽️</div>
+  <h2>No results found</h2>
+  <p>Try searching for something else — pasta, sushi, tacos...</p>
+</div>
+
+<!-- POPUP -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup" id="popup">
+    <button class="popup-close" id="closeBtn">✕</button>
+    <div id="popupContent"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://www.themealdb.com/api/json/v1/1/';
+const grid = document.getElementById('cardsGrid');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const popupOverlay = document.getElementById('popupOverlay');
+const popupContent = document.getElementById('popupContent');
+const closeBtn = document.getElementById('closeBtn');
+const emptyState = document.getElementById('emptyState');
+
+// Cuisine icons
+const icons = { time: '⏱', servings: '👤', category: '🍴' };
+
+function renderCards(meals) {
+  grid.innerHTML = '';
+  emptyState.style.display = 'none';
+  if (!meals || meals.length === 0) {
+    emptyState.style.display = 'block';
+    return;
+  }
+  meals.forEach((meal, i) => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.style.animationDelay = `${i * 0.07}s`;
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <img src="${meal.strMealThumb}" alt="${meal.strMeal}" loading="lazy">
+        <span class="card-badge">${meal.strCategory || 'Recipe'}</span>
+      </div>
+      <div class="card-body">
+        <h3>${meal.strMeal}</h3>
+        <div class="card-meta">
+          <span>${icons.category} ${meal.strArea || 'World'}</span>
+          <span>🏷️ ${meal.strTags ? meal.strTags.split(',')[0] : 'Popular'}</span>
+        </div>
+        <button class="card-btn" data-id="${meal.idMeal}">View Recipe →</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    card.querySelector('.card-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openPopup(meal.idMeal);
+    });
+    card.addEventListener('click', () => openPopup(meal.idMeal));
+  });
+}
+
+async function openPopup(id) {
+  popupContent.innerHTML = '<p style="text-align:center;padding:40px;color:var(--muted)">Loading...</p>';
+  popupOverlay.classList.add('open');
+  const res = await fetch(`${API}lookup.php?i=${id}`);
+  const data = await res.json();
+  const m = data.meals[0];
+
+  // Build ingredients list
+  let ings = '';
+  for (let i = 1; i <= 20; i++) {
+    const ing = m[`strIngredient${i}`];
+    const meas = m[`strMeasure${i}`];
+    if (ing && ing.trim()) {
+      ings += `<li style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.9rem">${meas ? `<strong style="color:var(--accent)">${meas.trim()}</strong> ` : ''}${ing}</li>`;
+    }
+  }
+
+  popupContent.innerHTML = `
+    <img src="${m.strMealThumb}" alt="${m.strMeal}">
+    <h2>${m.strMeal}</h2>
+    <div class="card-meta" style="margin-bottom:0">
+      <span>🌍 ${m.strArea}</span>
+      <span>🍴 ${m.strCategory}</span>
+      ${m.strYoutube ? `<a href="${m.strYoutube}" target="_blank" style="color:var(--accent2);font-size:0.82rem">▶ Watch Video</a>` : ''}
     </div>
-    <div class="border"></div>
-    <!-- footer section satrt -->
-     <div class="footer">
-        <div class="brandlogo">
-            <img src="images/logo.png" alt="">
-        </div>
-        <div class="box">
-            <h4>MAIN LINKS  </h4>
-            <a href="#">Order Tracking | </a>
-            <a href="#">New Order |</a>
-            <a href="#">Contact us |</a>
-            <a href="#">News And Blogs |</a>
-        </div>
-        <div class="box box2">
-            <h4>SUPPORTS</h4>
-            <a href="#">About us |</a>
-            <a href="#">Privacy policy |</a>
-            <a href="#">Terms & Conditions |</a>
-        </div>
-        <div class="box box3">
-            <h4>CONTACT US</h4>
-            <form action="">
-                <input type="email" placeholder="Enter Your email">
-            </form>
-        </div>
-     </div>
+    <div class="popup-section-label">Ingredients</div>
+    <ul style="list-style:none;padding:0">${ings}</ul>
+    <div class="popup-section-label">Instructions</div>
+    <p>${m.strInstructions}</p>
+  `;
+}
 
+closeBtn.addEventListener('click', () => popupOverlay.classList.remove('open'));
+popupOverlay.addEventListener('click', (e) => { if (e.target === popupOverlay) popupOverlay.classList.remove('open'); });
 
+async function search(q) {
+  grid.innerHTML = '<p style="color:var(--muted);padding:20px;grid-column:1/-1">Searching...</p>';
+  const res = await fetch(`${API}search.php?s=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  renderCards(data.meals);
+}
+
+searchBtn.addEventListener('click', () => {
+  const q = searchInput.value.trim();
+  if (q) search(q);
+});
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { const q = searchInput.value.trim(); if (q) search(q); }
+});
+
+// Load trending on start
+async function loadTrending() {
+  const terms = ['chicken', 'pasta', 'beef', 'sushi', 'curry'];
+  const meals = [];
+  for (const t of terms.slice(0,3)) {
+    const res = await fetch(`${API}search.php?s=${t}`);
+    const d = await res.json();
+    if (d.meals) meals.push(d.meals[0]);
+  }
+  renderCards(meals.filter(Boolean));
+}
+loadTrending();
+</script>
 </body>
 </html>
